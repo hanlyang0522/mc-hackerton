@@ -67,6 +67,8 @@ class CoverLetterDataPipeline:
                 http_client=self.http_client,
                 homepage_url=self.settings.company_homepage_url,
                 talent_page_url=self.settings.talent_page_url,
+                tavily_api_key=self.settings.tavily_api_key,
+                gemini_api_key=self.settings.gemini_api_key,
             )
             talent_profile = talent_collector.collect(company_name)
         except Exception as exc:  # pylint: disable=broad-except
