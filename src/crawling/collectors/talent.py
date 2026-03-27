@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
 import textwrap
+
+import anthropic
 
 from ..core.models import TalentProfile
 from ..core.utils import HttpClient
@@ -11,15 +14,10 @@ try:
 except ImportError:  # pragma: no cover
     _TavilyClient = None  # type: ignore[assignment,misc]
 
-try:
-    from google import genai as _genai
-except ImportError:  # pragma: no cover
-    _genai = None  # type: ignore[assignment]
 
+_SYSTEM_PROMPT = "당신은 기업 채용 분석 전문가입니다. 반드시 JSON만 출력하세요."
 
-_GEMINI_SYSTEM = "당신은 기업 채용 분석 전문가입니다. 반드시 JSON만 출력하세요."
-
-_GEMINI_USER = textwrap.dedent(
+_USER_TEMPLATE = textwrap.dedent(
     """\
     아래는 '{company}' 기업의 인재상·채용 문화 관련 검색 결과입니다.
 
@@ -37,7 +35,7 @@ _GEMINI_USER = textwrap.dedent(
 
 
 class TalentCollector:
-    """Tavily 검색 + Gemini 요약으로 기업 인재상을 수집한다."""
+    """Tavily 검색 + Claude 요약으로 기업 인재상을 수집한다."""
 
     def __init__(
         self,
@@ -45,22 +43,20 @@ class TalentCollector:
         homepage_url: str = "",
         talent_page_url: str = "",
         tavily_api_key: str = "",
-        gemini_api_key: str = "",
-        gemini_model: str = "gemini-2.5-flash",
+        gemini_api_key: str = "",  # 하위 호환성 유지 (미사용)
+        gemini_model: str = "",    # 하위 호환성 유지 (미사용)
     ) -> None:
-        self.http_client = http_client  # 미사용이지만 인터페이스 유지
+        self.http_client = http_client
         self._tavily_api_key = tavily_api_key
-        self._gemini_api_key = gemini_api_key
-        self._gemini_model = gemini_model
         self._tavily_client = None
-        self._gemini_client = None
+        self._claude_client = None
 
     def collect(self, company_name: str) -> TalentProfile | None:
         snippets = self._search_via_tavily(company_name)
         if not snippets:
             return None
 
-        result = self._summarize_via_gemini(company_name, snippets)
+        result = self._summarize_via_claude(company_name, snippets)
         if result is None:
             return None
 
@@ -95,26 +91,28 @@ class TalentCollector:
         except Exception:  # pylint: disable=broad-except
             return []
 
-    def _summarize_via_gemini(
+    def _summarize_via_claude(
         self, company_name: str, snippets: list[str]
     ) -> dict | None:
-        """Gemini로 인재상을 요약·구조화한다."""
-        if not self._gemini_api_key or _genai is None:
+        """Claude로 인재상을 요약·구조화한다."""
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
             return None
-        if self._gemini_client is None:
-            self._gemini_client = _genai.Client(api_key=self._gemini_api_key)
+        if self._claude_client is None:
+            self._claude_client = anthropic.Anthropic(api_key=api_key)
 
-        prompt = _GEMINI_USER.format(
+        prompt = _USER_TEMPLATE.format(
             company=company_name,
             snippets="\n\n".join(snippets),
         )
         try:
-            response = self._gemini_client.models.generate_content(
-                model=self._gemini_model,
-                contents=prompt,
-                config={"system_instruction": _GEMINI_SYSTEM},
+            message = self._claude_client.messages.create(
+                model="claude-sonnet-4-5",
+                max_tokens=1024,
+                system=_SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": prompt}],
             )
-            raw = response.text.strip()
+            raw = message.content[0].text.strip()
             if raw.startswith("```"):
                 raw = raw.split("\n", 1)[-1]
                 raw = raw.rsplit("```", 1)[0]

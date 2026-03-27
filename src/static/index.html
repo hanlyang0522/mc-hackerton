@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 자소서 생성기</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --card: #ffffff;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+      --danger: #ef4444;
+      --success: #22c55e;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--text-light);
+      margin-bottom: 32px;
+      font-size: 15px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .form-row .form-group { flex: 1; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+    }
+
+    .question-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .question-item input[type="text"] { flex: 1; }
+    .question-item input[type="number"] { width: 100px; }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+    }
+
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--primary);
+      border: 1px dashed var(--border);
+      width: 100%;
+      padding: 10px;
+    }
+
+    .btn-secondary:hover { border-color: var(--primary); }
+
+    .btn-remove {
+      background: transparent;
+      color: var(--danger);
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 8px;
+      line-height: 1;
+    }
+
+    .btn-remove:hover { opacity: 0.7; }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .loading.active { display: block; }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text {
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    /* 결과 영역 */
+    .results { display: none; }
+    .results.active { display: block; }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .result-header h2 {
+      font-size: 20px;
+    }
+
+    .btn-back {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-back:hover { border-color: var(--primary); }
+
+    .result-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0;
+    }
+
+    .result-tab {
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-light);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+
+    .result-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .result-tab:hover { color: var(--text); }
+
+    .result-panel { display: none; }
+    .result-panel.active { display: block; }
+
+    .result-meta {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .meta-tag {
+      font-size: 13px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: var(--text-light);
+    }
+
+    .draft-content {
+      white-space: pre-wrap;
+      line-height: 1.8;
+      font-size: 15px;
+      padding: 20px;
+      background: #fafafa;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .copy-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 12px;
+    }
+
+    .btn-copy {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      padding: 8px 16px;
+    }
+
+    .btn-copy:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-copy.copied { color: var(--success); border-color: var(--success); }
+
+    .error-msg {
+      display: none;
+      color: var(--danger);
+      background: #fef2f2;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    .error-msg.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AI 자소서 생성기</h1>
+    <p class="subtitle">기업 분석부터 초안 작성까지 자동으로</p>
+
+    <!-- 입력 폼 -->
+    <div id="formSection">
+      <div class="card">
+        <div class="form-row">
+          <div class="form-group">
+            <label>기업명</label>
+            <input type="text" id="company" placeholder="예: 삼성전자" />
+          </div>
+          <div class="form-group">
+            <label>직무</label>
+            <input type="text" id="position" placeholder="예: SW개발" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <label>질문</label>
+        <div id="questionList">
+          <div class="question-item">
+            <input type="text" class="q-text" placeholder="자소서 질문을 입력하세요" />
+            <input type="number" class="q-len" value="500" min="100" max="2000" title="글자수" />
+          </div>
+        </div>
+        <button class="btn btn-secondary" id="addQuestion">+ 질문 추가</button>
+      </div>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <button class="btn btn-primary" id="generateBtn">생성하기</button>
+    </div>
+
+    <!-- 로딩 -->
+    <div class="loading" id="loadingSection">
+      <div class="spinner"></div>
+      <p class="loading-text">기업 분석 및 자소서 생성 중...</p>
+      <p class="loading-text" style="margin-top:4px; font-size:12px; color:#94a3b8;">크롤링 + LLM 호출로 1~3분 소요될 수 있습니다</p>
+    </div>
+
+    <!-- 결과 -->
+    <div class="results" id="resultsSection">
+      <div class="result-header">
+        <h2 id="resultTitle"></h2>
+        <button class="btn btn-back" id="backBtn">다시 작성</button>
+      </div>
+      <div class="result-tabs" id="resultTabs"></div>
+      <div id="resultPanels"></div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => document.querySelectorAll(sel);
+
+    // 질문 추가
+    $('#addQuestion').addEventListener('click', () => {
+      const item = document.createElement('div');
+      item.className = 'question-item';
+      item.innerHTML = `
+        <input type="text" class="q-text" placeholder="자소서 질문을 입력하세요" />
+        <input type="number" class="q-len" value="500" min="100" max="2000" title="글자수" />
+        <button class="btn-remove" title="삭제">&times;</button>
+      `;
+      item.querySelector('.btn-remove').addEventListener('click', () => item.remove());
+      $('#questionList').appendChild(item);
+    });
+
+    // 생성
+    $('#generateBtn').addEventListener('click', async () => {
+      const company = $('#company').value.trim();
+      const position = $('#position').value.trim();
+      const errorEl = $('#errorMsg');
+      errorEl.classList.remove('active');
+
+      if (!company || !position) {
+        errorEl.textContent = '기업명과 직무를 입력해주세요.';
+        errorEl.classList.add('active');
+        return;
+      }
+
+      const questions = [];
+      $$('.question-item').forEach((item) => {
+        const text = item.querySelector('.q-text').value.trim();
+        const maxLen = parseInt(item.querySelector('.q-len').value) || 500;
+        if (text) questions.push({ text, max_length: maxLen });
+      });
+
+      if (questions.length === 0) {
+        errorEl.textContent = '질문을 하나 이상 입력해주세요.';
+        errorEl.classList.add('active');
+        return;
+      }
+
+      // UI 전환
+      $('#formSection').style.display = 'none';
+      $('#loadingSection').classList.add('active');
+      $('#resultsSection').classList.remove('active');
+
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ company, position, questions }),
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        renderResults(data);
+      } catch (err) {
+        $('#formSection').style.display = 'block';
+        errorEl.textContent = `오류: ${err.message}`;
+        errorEl.classList.add('active');
+      } finally {
+        $('#loadingSection').classList.remove('active');
+      }
+    });
+
+    // 결과 렌더링
+    function renderResults(data) {
+      $('#resultTitle').textContent = `${data.company} · ${data.position}`;
+      const tabs = $('#resultTabs');
+      const panels = $('#resultPanels');
+      tabs.innerHTML = '';
+      panels.innerHTML = '';
+
+      data.results.forEach((r, i) => {
+        // 탭
+        const tab = document.createElement('button');
+        tab.className = 'result-tab' + (i === 0 ? ' active' : '');
+        tab.textContent = `질문 ${i + 1}`;
+        tab.addEventListener('click', () => {
+          $$('.result-tab').forEach((t) => t.classList.remove('active'));
+          $$('.result-panel').forEach((p) => p.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById(`panel-${i}`).classList.add('active');
+        });
+        tabs.appendChild(tab);
+
+        // 패널
+        const panel = document.createElement('div');
+        panel.className = 'result-panel card' + (i === 0 ? ' active' : '');
+        panel.id = `panel-${i}`;
+
+        const typeLabel = r.question_type || '공통';
+
+        panel.innerHTML = `
+          <p style="font-weight:600; margin-bottom:12px;">${r.question}</p>
+          <div class="result-meta">
+            <span class="meta-tag">유형: ${typeLabel}</span>
+            <span class="meta-tag">소재: ${r.material_display}</span>
+            <span class="meta-tag">${r.char_count}자</span>
+          </div>
+          <div class="draft-content">${escapeHtml(r.draft)}</div>
+          <div class="copy-row">
+            <button class="btn btn-copy" data-idx="${i}">복사</button>
+          </div>
+        `;
+        panels.appendChild(panel);
+      });
+
+      // 복사 버튼
+      $$('.btn-copy').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.idx);
+          navigator.clipboard.writeText(data.results[idx].draft);
+          btn.textContent = '복사됨';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = '복사';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      $('#resultsSection').classList.add('active');
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // 뒤로가기
+    $('#backBtn').addEventListener('click', () => {
+      $('#resultsSection').classList.remove('active');
+      $('#formSection').style.display = 'block';
+    });
+  </script>
+</body>
+</html>
