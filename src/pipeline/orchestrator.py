@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from ..crawling.pipeline import CoverLetterDataPipeline
 from ..material_selection import MaterialSelector
 from ..structure_selection import StructureSelector
 from .llm_client import generate_draft, generate_outline
@@ -56,19 +57,24 @@ class CoverLetterPipeline:
         if max_lengths is None:
             max_lengths = [500] * len(questions)
 
-        # 1. 직무분석 데이터 로드
+        # 1. 크롤링 실행
+        print(f"  → {company} 직무분석 크롤링 중...")
+        crawl_pipeline = CoverLetterDataPipeline(db_root=_DB_DIR)
+        crawl_pipeline.run(company, job_title=position)
+
+        # 2. 직무분석 데이터 로드
         research_context, competency_keywords = self._load_research(company)
 
-        # 2. 구조 선택 (질문 유형 분류)
+        # 3. 구조 선택 (질문 유형 분류)
         structures = self.structure_selector.select_all(questions)
         question_types = [s.question_type for s in structures]
 
-        # 3. 소재 선택
+        # 4. 소재 선택
         materials = self.material_selector.select_all(
             questions, competency_keywords, question_types
         )
 
-        # 4. 질문별 큰틀 → 초안
+        # 5. 질문별 큰틀 → 초안
         results: list[QuestionResult] = []
         for question, structure, material, max_len in zip(
             questions, structures, materials, max_lengths
@@ -149,7 +155,7 @@ class CoverLetterPipeline:
                 keywords = data.get("keywords", [])
                 return context, keywords
 
-        print(f"  ⚠ {company} 직무분석 데이터 없음 — 빈 컨텍스트로 진행")
+        print(f"  ⚠ {company} 직무분석 데이터 로드 실패 — 빈 컨텍스트로 진행")
         return "", []
 
     def _format_research_context(self, data: dict[str, Any]) -> str:
