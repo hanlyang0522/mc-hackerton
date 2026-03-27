@@ -1,10 +1,11 @@
-"""Gemini API를 이용해 수집 데이터에서 직무 관련 핵심 정보를 추출한다."""
+"""Claude API를 이용해 수집 데이터에서 직무 관련 핵심 정보를 추출한다."""
 from __future__ import annotations
 
 import json
+import os
 import textwrap
 
-from google import genai
+import anthropic
 
 from ..core.models import DartBusinessContent, NewsItem, TalentProfile
 
@@ -55,13 +56,14 @@ _USER_TEMPLATE = textwrap.dedent("""\
 
 
 class GeminiExtractor:
-    """Gemini API로 수집 데이터에서 직무 관련 핵심 정보를 추출한다."""
+    """Claude API로 수집 데이터에서 직무 관련 핵심 정보를 추출한다."""
 
-    def __init__(self, api_key: str, model: str = "gemini-2.5-flash") -> None:
-        if not api_key:
-            raise ValueError("GEMINI_API_KEY is required")
-        self._client = genai.Client(api_key=api_key)
-        self._model = model
+    def __init__(self, api_key: str = "", model: str = "") -> None:
+        # api_key, model 파라미터는 하위 호환성 유지 (ANTHROPIC_API_KEY 환경변수 사용)
+        anthropic_key = os.environ.get("ANTHROPIC_API_KEY", api_key)
+        if not anthropic_key:
+            raise ValueError("ANTHROPIC_API_KEY is required")
+        self._client = anthropic.Anthropic(api_key=anthropic_key)
 
     def extract(
         self,
@@ -84,14 +86,14 @@ class GeminiExtractor:
             news_section=news_section,
         )
 
-        response = self._client.models.generate_content(
-            model=self._model,
-            contents=prompt,
-            config={"system_instruction": _SYSTEM_PROMPT},
+        message = self._client.messages.create(
+            model="claude-sonnet-4-5",
+            max_tokens=2048,
+            system=_SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": prompt}],
         )
 
-        raw = response.text.strip()
-        # 마크다운 코드블록 제거
+        raw = message.content[0].text.strip()
         if raw.startswith("```"):
             raw = raw.split("\n", 1)[-1]
             raw = raw.rsplit("```", 1)[0]
@@ -117,7 +119,6 @@ class GeminiExtractor:
         parts = []
         for item in items:
             header = f"### {item.year}년 {item.report_name}"
-            # 너무 길면 앞부분만 사용 (토큰 절약)
             content = item.business_content[:6000]
             parts.append(f"{header}\n{content}")
         return "\n\n".join(parts)
@@ -127,7 +128,7 @@ class GeminiExtractor:
         if not items:
             return "(뉴스 데이터 없음)"
         lines = []
-        for item in items[:20]:  # 최대 20건
+        for item in items[:20]:
             date_str = item.published_at[:10] if item.published_at else ""
             summary = item.summary or item.title
             lines.append(f"- [{date_str}] {item.title}\n  {summary}")
