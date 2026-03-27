@@ -14,6 +14,7 @@ class Settings:
     dart_api_key: str
     tavily_api_key: str
     gemini_api_key: str
+    reviewer_api_url: str
     news_api_endpoint: str
     news_api_client_id: str
     news_api_client_secret: str
@@ -32,6 +33,7 @@ def get_settings() -> Settings:
         dart_api_key=os.getenv("DART_API_KEY", "").strip(),
         tavily_api_key=os.getenv("TAVILY_API_KEY", "").strip(),
         gemini_api_key=os.getenv("GEMINI_API_KEY", "").strip(),
+        reviewer_api_url=os.getenv("REVIEWER_API_URL", "").strip(),
         news_api_endpoint=os.getenv(
             "NEWS_API_ENDPOINT", "https://openapi.naver.com/v1/search/news.json"
         ).strip(),

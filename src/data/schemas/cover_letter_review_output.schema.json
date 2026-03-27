@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mc-hackerton.local/schemas/cover_letter_review_output.schema.json",
+  "title": "CoverLetterReviewOutput",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pass",
+    "score",
+    "char_check",
+    "dimension_scores",
+    "issues",
+    "banned_word_hits",
+    "rewrite_guidance"
+  ],
+  "properties": {
+    "pass": {
+      "type": "boolean"
+    },
+    "score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "char_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pass",
+        "counted_chars",
+        "mode",
+        "expected",
+        "utilization_ratio",
+        "utilization_pass",
+        "message"
+      ],
+      "properties": {
+        "pass": {
+          "type": "boolean"
+        },
+        "counted_chars": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "exact",
+            "range",
+            "max_only",
+            "min_only"
+          ]
+        },
+        "expected": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "target": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "min": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "max": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "utilization_ratio": {
+          "type": "number",
+          "minimum": 0
+        },
+        "utilization_pass": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "dimension_scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "question_fit",
+        "clarity",
+        "evidence",
+        "job_alignment",
+        "tone_naturalness"
+      ],
+      "properties": {
+        "question_fit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "clarity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "evidence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "job_alignment": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "tone_naturalness": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "severity",
+          "message",
+          "suggestion"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "char_count",
+              "question_fit",
+              "logic_flow",
+              "evidence",
+              "job_alignment",
+              "tone",
+              "banned_word",
+              "other"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "evidence_text": {
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "banned_word_hits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "word",
+          "suggestion"
+        ],
+        "properties": {
+          "word": {
+            "type": "string"
+          },
+          "evidence_text": {
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "rewrite_guidance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "keep_points",
+        "fix_points",
+        "recommended_outline"
+      ],
+      "properties": {
+        "keep_points": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fix_points": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recommended_outline": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 5,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "final_comment": {
+      "type": "string",
+      "description": "선택 필드: 사용자에게 보여줄 한 줄 코멘트"
+    }
+  }
+}

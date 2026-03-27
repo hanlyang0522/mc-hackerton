@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mc-hackerton.local/schemas/cover_letter_review_input.schema.json",
+  "title": "CoverLetterReviewInput",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "company",
+    "job_title",
+    "question",
+    "essay",
+    "char_policy",
+    "banned_words"
+  ],
+  "properties": {
+    "company": {
+      "type": "string",
+      "minLength": 1
+    },
+    "job_title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "question": {
+      "type": "string",
+      "minLength": 1
+    },
+    "essay": {
+      "type": "string",
+      "minLength": 1
+    },
+    "char_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "count_spaces"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "exact",
+            "range",
+            "max_only",
+            "min_only"
+          ]
+        },
+        "target": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "min": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "count_spaces": {
+          "type": "boolean",
+          "default": true
+        },
+        "enforce_90_95_rule": {
+          "type": "boolean",
+          "default": true,
+          "description": "true면 답변 글자수가 기준 글자수의 90~95% 범위인지 하드 룰로 검사"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "exact"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "required": [
+              "target"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "range"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "required": [
+              "min",
+              "max"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "max_only"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "required": [
+              "max"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "min_only"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "required": [
+              "min"
+            ]
+          }
+        }
+      ]
+    },
+    "banned_words": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "선택 필드: 크롤링/분석 컨텍스트를 넣고 싶을 때 사용"
+    }
+  }
+}

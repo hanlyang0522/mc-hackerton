@@ -35,6 +35,7 @@ cp .env.example .env
 | `DART_API_KEY` | OpenDART API 키 (dart_fss) | ✅ |
 | `TAVILY_API_KEY` | Tavily 검색 API 키 (기업 정보/뉴스 검색) | ✅ |
 | `GEMINI_API_KEY` | Google Gemini API 키 (기업 분석 및 자소서 생성) | ✅ |
+| `REVIEWER_API_URL` | reviewer HTTP 서버 주소. 설정 시 생성된 자소서 초안 평가 실행 | ❌ |
 | `NEWS_API_CLIENT_ID`, `NEWS_API_CLIENT_SECRET` | Naver News API (Tavily 실패 시 폴백) | ❌ |
 | `MCP_NEWS_ENDPOINT` | MCP 뉴스 서버 (마지막 폴백) | ❌ |
 
@@ -50,6 +51,17 @@ python -m src.main "SK하이닉스"
 python -m src.main "SK하이닉스" --job "반도체 공정 엔지니어"
 ```
 
+### 자소서 생성 + reviewer 평가
+```bash
+python -m src.reviewer_agent_server
+
+# 다른 터미널에서
+export REVIEWER_API_URL=http://127.0.0.1:8000/agent/reviewer
+python -m src.generate "SK하이닉스" "반도체 공정 엔지니어" "지원 동기를 서술하시오" --max-length 1000
+```
+
+`REVIEWER_API_URL`이 설정되어 있으면 reviewer는 생성된 초안을 평가합니다. 설정되어 있지 않으면 reviewer 단계는 자동으로 건너뜁니다.
+
 ## 출력
 
 ### 수집된 기업 정보
@@ -59,7 +71,8 @@ python -m src.main "SK하이닉스" --job "반도체 공정 엔지니어"
 - `db/processed/<company>.json` - 통합 기업 정보
 
 ### 생성된 자소서
-- `db/gemini/<company>_<job>.json` - Gemini 분석 결과 (직무 관련 요점, 최근 이슈, 인재상 적합도 등)
+- `db/processed/gemini/<company>_<job>.json` - Gemini 분석 결과 (직무 관련 요점, 최근 이슈, 인재상 적합도 등)
+- `db/processed/review/<company>_<job>_<hash>.json` - reviewer 평가 결과
 
 ## 코드 구조
 
@@ -80,6 +93,7 @@ src/
 │       ├── storage.py               # JSON 저장
 │       └── utils.py                 # HTTP/문자열 유틸
 ├── material_selection/              # 자소서 소재 선택 알고리즘
+├── pipeline/                        # 자소서 생성 및 reviewer 연동
 └── structure_selection/             # 자소서 글 구조 선택 알고리즘
 ```
 

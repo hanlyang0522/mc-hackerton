@@ -5,14 +5,19 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from ..crawling.core.config import get_settings
+from ..crawling.core.storage import JsonStorage
+from ..crawling.core.utils import HttpClient, slugify
 from ..crawling.pipeline import CoverLetterDataPipeline
 from ..material_selection import MaterialSelector
 from ..structure_selection import StructureSelector
 from .llm_client import generate_draft, generate_outline
 from .prompt_builder import build_draft_prompt, build_outline_prompt
+from .review_integration import review_essay
 
 
 _DB_DIR = Path(__file__).resolve().parent.parent.parent / "db"
+_BANNED_WORDS_PATH = Path(__file__).resolve().parent.parent / "data" / "banned_words.json"
 
 
 @dataclass
@@ -26,6 +31,7 @@ class QuestionResult:
     char_count: int
     score: int
     score_breakdown: dict[str, int] = field(default_factory=dict)
+    review_result: dict[str, Any] | None = None
 
 
 @dataclass
@@ -37,8 +43,16 @@ class PipelineOutput:
 
 class CoverLetterPipeline:
     def __init__(self) -> None:
+        self.settings = get_settings()
         self.material_selector = MaterialSelector()
         self.structure_selector = StructureSelector()
+        self.storage = JsonStorage(_DB_DIR)
+        self.http_client = HttpClient(
+            timeout_seconds=self.settings.request_timeout_seconds,
+            retry_count=self.settings.request_retry_count,
+            sleep_seconds=self.settings.request_sleep_seconds,
+        )
+        self.banned_words = self._load_banned_words()
 
     def run(
         self,
@@ -108,6 +122,24 @@ class CoverLetterPipeline:
             char_count = len(draft)
             print(f"  → 초안 완료 ({char_count}자 / 목표 {max_len}자)")
 
+            review_result = self._review_draft(
+                company=company,
+                position=position,
+                question=question,
+                draft=draft,
+                max_length=max_len,
+            )
+            if review_result is not None:
+                review_score = review_result.get("score", "-")
+                review_pass = review_result.get("pass", False)
+                print(f"  → reviewer 완료 (pass={review_pass}, score={review_score})")
+                self.storage.save_reviewer(
+                    company=company,
+                    job_title=position,
+                    question=question,
+                    review_result=review_result,
+                )
+
             results.append(QuestionResult(
                 question=question,
                 question_type=structure.question_type,
@@ -118,6 +150,7 @@ class CoverLetterPipeline:
                 char_count=char_count,
                 score=material.score,
                 score_breakdown=material.score_breakdown,
+                review_result=review_result,
             ))
 
         output = PipelineOutput(
@@ -136,8 +169,10 @@ class CoverLetterPipeline:
         Returns:
             (research_context 문자열, competency_keywords 리스트)
         """
+        company_key = slugify(company)
+
         # processed 폴더에서 직무분석 결과 로드
-        processed_path = _DB_DIR / "processed" / f"{company}.json"
+        processed_path = _DB_DIR / "processed" / f"{company_key}.json"
         if processed_path.exists():
             with open(processed_path, encoding="utf-8") as f:
                 data = json.load(f)
@@ -146,13 +181,13 @@ class CoverLetterPipeline:
             return context, keywords
 
         # Gemini 분석 결과 로드
-        gemini_dir = _DB_DIR / "gemini"
+        gemini_dir = _DB_DIR / "processed" / "gemini"
         if gemini_dir.exists():
-            for p in gemini_dir.glob(f"{company}*.json"):
+            for p in gemini_dir.glob(f"{company_key}*.json"):
                 with open(p, encoding="utf-8") as f:
                     data = json.load(f)
                 context = self._format_gemini_context(data)
-                keywords = data.get("keywords", [])
+                keywords = data.get("keywords_for_cover_letter", [])
                 return context, keywords
 
         print(f"  ⚠ {company} 직무분석 데이터 로드 실패 — 빈 컨텍스트로 진행")
@@ -178,7 +213,7 @@ class CoverLetterPipeline:
         # 인재상
         talent = data.get("talent_profile")
         if talent:
-            keywords = talent.get("keywords", [])
+            keywords = talent.get("core_values", [])
             if keywords:
                 parts.append(f"\n[인재상 키워드] {', '.join(keywords)}")
 
@@ -190,7 +225,7 @@ class CoverLetterPipeline:
 
         talent = data.get("talent_profile")
         if talent:
-            keywords.extend(talent.get("keywords", []))
+            keywords.extend(talent.get("core_values", []))
 
         return keywords
 
@@ -198,7 +233,11 @@ class CoverLetterPipeline:
         """Gemini 분석 결과를 컨텍스트 문자열로 변환."""
         parts: list[str] = []
 
-        for key in ["job_points", "recent_issues", "talent_fit"]:
+        summary = data.get("business_summary", "")
+        if summary:
+            parts.append(f"[business_summary]\n{summary}")
+
+        for key in ["job_relevant_points", "recent_issues", "talent_alignment"]:
             items = data.get(key, [])
             if items:
                 parts.append(f"\n[{key}]")
@@ -206,3 +245,38 @@ class CoverLetterPipeline:
                     parts.append(f"- {item}")
 
         return "\n".join(parts)
+
+    def _load_banned_words(self) -> list[str]:
+        with open(_BANNED_WORDS_PATH, encoding="utf-8") as f:
+            return json.load(f)
+
+    def _review_draft(
+        self,
+        company: str,
+        position: str,
+        question: str,
+        draft: str,
+        max_length: int,
+    ) -> dict[str, Any] | None:
+        if not self.settings.reviewer_api_url:
+            return None
+
+        try:
+            return review_essay(
+                company=company,
+                job_title=position,
+                question=question,
+                essay=draft,
+                char_policy={
+                    "mode": "max_only",
+                    "max": max_length,
+                    "count_spaces": True,
+                    "enforce_90_95_rule": True,
+                },
+                banned_words=self.banned_words,
+                reviewer_api_url=self.settings.reviewer_api_url,
+                http_client=self.http_client,
+            )
+        except Exception as exc:  # pylint: disable=broad-except
+            print(f"  → reviewer 건너뜀: {exc}")
+            return None

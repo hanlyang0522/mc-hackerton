@@ -1,0 +1,51 @@
+{
+  "company": "SK하이닉스",
+  "job_title": "반도체 공정 엔지니어",
+  "question": "지원 동기를 서술하시오",
+  "pass": false,
+  "score": 80,
+  "char_check": {
+    "pass": false,
+    "counted_chars": 356,
+    "mode": "max_only",
+    "expected": {
+      "max": 300
+    },
+    "utilization_ratio": 1.1867,
+    "utilization_pass": false,
+    "message": "max_only 기준: 최대 300자, 실제 356자, 사용률 1.187"
+  },
+  "dimension_scores": {
+    "question_fit": 85,
+    "clarity": 80,
+    "evidence": 78,
+    "job_alignment": 75,
+    "tone_naturalness": 84
+  },
+  "issues": [
+    {
+      "type": "char_count",
+      "severity": "high",
+      "message": "글자수 또는 사용률 기준을 충족하지 못했습니다.",
+      "evidence_text": "356",
+      "suggestion": "핵심 문장을 압축/확장하여 90~95% 구간을 맞추세요."
+    }
+  ],
+  "banned_word_hits": [],
+  "rewrite_guidance": {
+    "keep_points": [
+      "질문에 대한 답변 의도를 유지하세요.",
+      "핵심 경험 1개를 중심으로 유지하세요."
+    ],
+    "fix_points": [
+      "문장 길이를 조절해 글자수 사용률을 90~95%로 맞추세요.",
+      "금지 표현은 구체적 행동/결과 문장으로 바꾸세요."
+    ],
+    "recommended_outline": [
+      "문제/과제 배경 한 문장",
+      "본인이 취한 행동과 판단 근거",
+      "정량/정성 결과"
+    ]
+  },
+  "final_comment": "기준 충족 여부를 확인했고, 수정 포인트를 반영하면 완성도가 높아집니다."
+}

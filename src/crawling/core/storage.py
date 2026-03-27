@@ -4,7 +4,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .models import DartBusinessContent, NewsItem, PipelineResult, TalentProfile
-from .utils import slugify, write_json
+from .utils import hash_key, slugify, write_json
 
 
 class JsonStorage:
@@ -12,6 +12,27 @@ class JsonStorage:
         self.root_dir = root_dir
         self.raw_dir = root_dir / "raw"
         self.processed_dir = root_dir / "processed"
+
+    def save_reviewer(
+        self,
+        company: str,
+        job_title: str,
+        review_result: dict,
+        question: str = "",
+    ) -> None:
+        company_key = slugify(company)
+        job_key = slugify(job_title) if job_title else "unknown"
+        filename = f"{company_key}_{job_key}"
+        if question:
+            filename = f"{filename}_{hash_key(question)[:12]}"
+        review_path = self.processed_dir / "review" / f"{filename}.json"
+        payload = {
+            "company": company,
+            "job_title": job_title,
+            "question": question,
+            **review_result,
+        }
+        write_json(review_path, payload)
 
     def save_dart(self, company: str, items: list[DartBusinessContent]) -> None:
         company_key = slugify(company)

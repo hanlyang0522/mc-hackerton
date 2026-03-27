@@ -44,6 +44,12 @@ def main() -> None:
         print(f"질문: {r.question}")
         print(f"유형: {r.question_type or '공통'} | 소재: {r.material_display}")
         print(f"글자수: {r.char_count}자")
+        if r.review_result is not None:
+            print(
+                "리뷰: "
+                f"pass={r.review_result.get('pass', False)} "
+                f"score={r.review_result.get('score', '-') }"
+            )
         print(f"{'-'*60}")
         print(r.draft)
 
