@@ -1,7 +1,7 @@
 import json
 import subprocess
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from ..crawling.core.utils import HttpClient
 
@@ -124,7 +124,7 @@ def review_essay(
     foundry_model_deployment_name: str = "",
     foundry_api_key: str = "",
     foundry_api_version: str = "2024-06-01",
-    http_client: HttpClient | None = None,
+    http_client: Optional[HttpClient] = None,
 ) -> dict:
     client = http_client or HttpClient(timeout_seconds=30, retry_count=1, sleep_seconds=0.0)
     input_data = build_reviewer_input(

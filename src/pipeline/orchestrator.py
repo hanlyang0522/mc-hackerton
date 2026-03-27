@@ -122,6 +122,7 @@ class CoverLetterPipeline:
             char_count = len(draft)
             print(f"  → 초안 완료 ({char_count}자 / 목표 {max_len}자)")
 
+            # 1차 reviewer 실행 (글자수 + 표현 검수)
             review_result = self._review_draft(
                 company=company,
                 position=position,
@@ -130,15 +131,45 @@ class CoverLetterPipeline:
                 max_length=max_len,
             )
             if review_result is not None:
-                review_score = review_result.get("score", "-")
                 review_pass = review_result.get("pass", False)
-                print(f"  → reviewer 완료 (pass={review_pass}, score={review_score})")
+                char_check = review_result.get("char_check", {})
+                counted = char_check.get("counted_chars", char_count)
+                print(f"  → 1차 reviewer 완료 (pass={review_pass}, {counted}자/{max_len}자)")
+
+                if not review_pass:
+                    # 표현+글자수 보정 재생성 (1회)
+                    print("  → 재생성 중 (글자수/표현 보정)...")
+                    rewrite_prompt = build_draft_prompt(
+                        question=question,
+                        outline=outline,
+                        max_length=max_len,
+                    )
+                    draft = generate_draft(rewrite_prompt)
+                    char_count = len(draft)
+                    print(f"  → 재생성 완료 ({char_count}자 / 목표 {max_len}자)")
+
+                    # 2차 reviewer 실행 (글자수 10% 이내면 통과)
+                    review_result = self._review_draft(
+                        company=company,
+                        position=position,
+                        question=question,
+                        draft=draft,
+                        max_length=max_len,
+                    )
+                    if review_result is not None:
+                        char_check2 = review_result.get("char_check", {})
+                        counted2 = char_check2.get("counted_chars", char_count)
+                        within_10pct = abs(counted2 - max_len) / max_len <= 0.10
+                        print(f"  → 2차 reviewer 완료 ({counted2}자, 10%이내={within_10pct})")
+
                 self.storage.save_reviewer(
                     company=company,
                     job_title=position,
                     question=question,
                     review_result=review_result,
                 )
+                review_score = review_result.get("score", "-")
+                print(f"  → 최종 score={review_score}, {len(draft)}자")
 
             results.append(QuestionResult(
                 question=question,
@@ -147,7 +178,7 @@ class CoverLetterPipeline:
                 material_id=material.material_id,
                 outline=outline,
                 draft=draft,
-                char_count=char_count,
+                char_count=len(draft),
                 score=material.score,
                 score_breakdown=material.score_breakdown,
                 review_result=review_result,
