@@ -1,96 +1,123 @@
 from __future__ import annotations
 
-import re
-from urllib.parse import urljoin
-
-from bs4 import BeautifulSoup
+import json
+import textwrap
 
 from ..core.models import TalentProfile
-from ..core.utils import HttpClient, slugify
+from ..core.utils import HttpClient
+
+try:
+    from tavily import TavilyClient as _TavilyClient
+except ImportError:  # pragma: no cover
+    _TavilyClient = None  # type: ignore[assignment,misc]
+
+try:
+    from google import genai as _genai
+except ImportError:  # pragma: no cover
+    _genai = None  # type: ignore[assignment]
+
+
+_GEMINI_SYSTEM = "당신은 기업 채용 분석 전문가입니다. 반드시 JSON만 출력하세요."
+
+_GEMINI_USER = textwrap.dedent(
+    """\
+    아래는 '{company}' 기업의 인재상·채용 문화 관련 검색 결과입니다.
+
+    {snippets}
+
+    위 내용을 바탕으로 '{company}'의 인재상을 아래 JSON 형식으로 정리해 주세요.
+    다른 텍스트 없이 JSON만 출력하세요.
+
+    {{
+      "talent_description": "인재상 종합 설명 (3-5문장)",
+      "core_values": ["핵심가치1", "핵심가치2", "...최대 8개"]
+    }}
+"""
+)
 
 
 class TalentCollector:
-    KEYWORDS = ["인재상", "핵심가치", "인재", "가치", "채용", "문화"]
+    """Tavily 검색 + Gemini 요약으로 기업 인재상을 수집한다."""
 
-    def __init__(self, http_client: HttpClient, homepage_url: str = "", talent_page_url: str = "") -> None:
-        self.http_client = http_client
-        self.homepage_url = homepage_url
-        self.talent_page_url = talent_page_url
+    def __init__(
+        self,
+        http_client: HttpClient,
+        homepage_url: str = "",
+        talent_page_url: str = "",
+        tavily_api_key: str = "",
+        gemini_api_key: str = "",
+        gemini_model: str = "gemini-2.5-flash",
+    ) -> None:
+        self.http_client = http_client  # 미사용이지만 인터페이스 유지
+        self._tavily_api_key = tavily_api_key
+        self._gemini_api_key = gemini_api_key
+        self._gemini_model = gemini_model
+        self._tavily_client = None
+        self._gemini_client = None
 
     def collect(self, company_name: str) -> TalentProfile | None:
-        candidates = self._candidate_urls(company_name)
-        for url in candidates:
-            try:
-                response = self.http_client.get(url, headers={"User-Agent": "Mozilla/5.0"})
-            except Exception:  # pylint: disable=broad-except
-                continue
+        snippets = self._search_via_tavily(company_name)
+        if not snippets:
+            return None
 
-            soup = BeautifulSoup(response.text, "lxml")
-            body_text = soup.get_text("\n")
-            if not self._looks_like_talent_page(body_text):
-                # 홈페이지에서 인재상 링크를 찾는 1차 확장
-                nested = self._find_talent_link(soup, url)
-                if nested:
-                    try:
-                        nested_response = self.http_client.get(nested, headers={"User-Agent": "Mozilla/5.0"})
-                        nested_soup = BeautifulSoup(nested_response.text, "lxml")
-                        body_text = nested_soup.get_text("\n")
-                        url = nested
-                    except Exception:  # pylint: disable=broad-except
-                        pass
+        result = self._summarize_via_gemini(company_name, snippets)
+        if result is None:
+            return None
 
-            if not self._looks_like_talent_page(body_text):
-                continue
-
-            sections = self._extract_sections(body_text)
-            keywords = [word for word in self.KEYWORDS if word in body_text]
-            excerpt = re.sub(r"\s+", " ", body_text).strip()[:3000]
-
-            return TalentProfile(
-                company=company_name,
-                page_url=url,
-                sections=sections,
-                keywords=keywords,
-                raw_excerpt=excerpt,
-            )
-        return None
-
-    def _candidate_urls(self, company_name: str) -> list[str]:
-        if self.talent_page_url:
-            return [self.talent_page_url]
-
-        candidates: list[str] = []
-        if self.homepage_url:
-            candidates.append(self.homepage_url)
-        slug = slugify(company_name).replace("-", "")
-        candidates.extend(
-            [
-                f"https://www.{slug}.co.kr",
-                f"https://www.{slug}.com",
-                f"https://career.{slug}.co.kr",
-            ]
+        return TalentProfile(
+            company=company_name,
+            talent_description=result.get("talent_description", ""),
+            core_values=result.get("core_values", []),
+            source_snippets=snippets,
         )
-        return candidates
 
-    def _looks_like_talent_page(self, text: str) -> bool:
-        hit_count = sum(1 for word in self.KEYWORDS if word in text)
-        return hit_count >= 2
+    # ------------------------------------------------------------------ helpers
 
-    def _find_talent_link(self, soup: BeautifulSoup, base_url: str) -> str:
-        for anchor in soup.find_all("a", href=True):
-            title = (anchor.get_text(" ", strip=True) or "") + " " + str(anchor.get("href", ""))
-            if any(word in title for word in self.KEYWORDS):
-                return urljoin(base_url, str(anchor["href"]))
-        return ""
+    def _search_via_tavily(self, company_name: str) -> list[str]:
+        """Tavily로 '{기업} 인재상' 검색 후 스니펫 리스트를 반환한다."""
+        if not self._tavily_api_key or _TavilyClient is None:
+            return []
+        if self._tavily_client is None:
+            self._tavily_client = _TavilyClient(api_key=self._tavily_api_key)
+        try:
+            response = self._tavily_client.search(
+                query=f"{company_name} 인재상 핵심가치 채용문화",
+                search_depth="advanced",
+                max_results=5,
+            )
+            results = response.get("results", [])
+            snippets = []
+            for r in results:
+                content = (r.get("content") or r.get("description") or "").strip()
+                if content:
+                    snippets.append(f"[출처: {r.get('url', '')}]\n{content[:800]}")
+            return snippets
+        except Exception:  # pylint: disable=broad-except
+            return []
 
-    def _extract_sections(self, text: str) -> list[str]:
-        lines = [line.strip() for line in text.splitlines() if line.strip()]
-        selected: list[str] = []
-        for line in lines:
-            if len(line) > 80:
-                continue
-            if any(keyword in line for keyword in self.KEYWORDS):
-                selected.append(line)
-            if len(selected) >= 20:
-                break
-        return selected
+    def _summarize_via_gemini(
+        self, company_name: str, snippets: list[str]
+    ) -> dict | None:
+        """Gemini로 인재상을 요약·구조화한다."""
+        if not self._gemini_api_key or _genai is None:
+            return None
+        if self._gemini_client is None:
+            self._gemini_client = _genai.Client(api_key=self._gemini_api_key)
+
+        prompt = _GEMINI_USER.format(
+            company=company_name,
+            snippets="\n\n".join(snippets),
+        )
+        try:
+            response = self._gemini_client.models.generate_content(
+                model=self._gemini_model,
+                contents=prompt,
+                config={"system_instruction": _GEMINI_SYSTEM},
+            )
+            raw = response.text.strip()
+            if raw.startswith("```"):
+                raw = raw.split("\n", 1)[-1]
+                raw = raw.rsplit("```", 1)[0]
+            return json.loads(raw)
+        except Exception:  # pylint: disable=broad-except
+            return None

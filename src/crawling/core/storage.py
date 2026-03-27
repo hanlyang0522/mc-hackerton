@@ -28,8 +28,16 @@ class JsonStorage:
     def save_talent(self, company: str, profile: TalentProfile | None) -> None:
         company_key = slugify(company)
         raw_path = self.raw_dir / "talent" / f"{company_key}.json"
-        payload = asdict(profile) if profile else {"company": company, "status": "not_found"}
+        payload = (
+            asdict(profile) if profile else {"company": company, "status": "not_found"}
+        )
         write_json(raw_path, payload)
+
+    def save_gemini(self, company: str, job_title: str, insights: dict) -> None:
+        company_key = slugify(company)
+        job_key = slugify(job_title) if job_title else "unknown"
+        raw_path = self.processed_dir / "gemini" / f"{company_key}_{job_key}.json"
+        write_json(raw_path, {"company": company, "job_title": job_title, **insights})
 
     def save_summary(self, result: PipelineResult) -> Path:
         company_key = slugify(result.company)
