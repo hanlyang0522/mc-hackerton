@@ -83,41 +83,27 @@ src/
 └── structure_selection/             # 자소서 글 구조 선택 알고리즘
 ```
 
-### 크롤링 파이프라인 상세
+### 크롤링 알고리즘
 
-#### 1. DART 사업보고서 수집 (`dart.py`)
-1. corp_code 조회 (dart_fss 이용)
-2. 최근 3개년 신고서 검색
-3. `_filter_subsections()`: 정규식 `r"(?=\n\d+\.\s+(?:사업의\s*개요|주요\s*제품|...))"` 로 DART 섹션만 추출
-4. `_deduplicate_overview()`: "사업의 개요" 중복 제거 (최신년만 유지)
+#### 1. DART 사업보고서 수집
+- corp_code 조회 후 최근 3개년 신고서 검색
+- DART 섹션 필터링으로 "사업의 개요", "주요 제품" 등 추출
+- "사업의 개요" 중복 제거 (최신년만 유지)
 
-#### 2. 뉴스 수집 (`news.py` / `cover_letter.py`)
-**폴백 우선순위:**
-1. **Tavily** (고급 검색, 최대 20개) - 기본값
-2. **Naver News API** (검색 ID/PW 필요 시)
-3. **MCP NewsProvider** (마지막 폴백)
+#### 2. 뉴스 수집
+| 우선순위 | 제공자 | 특징 |
+|---|---|---|
+| 1순위 | Tavily | 고급 검색 (최대 20개) |
+| 2순위 | Naver News API | 국내 뉴스 (ID/PW 필수) |
+| 3순위 | MCP NewsProvider | 폴백 |
 
-#### 3. 기업 인재상 수집 (`talent.py`)
-1. Tavily 검색: 쿼리 `"{company} 인재상 핵심가치 채용문화"` → 5개 스니펫
-2. Gemini 정리: 스니펫을 JSON 형식(`talent_description`, `core_values` 리스트)으로 변환
+#### 3. 기업 인재상 수집
+1. Tavily 검색: `"{company} 인재상 핵심가치 채용문화"` 쿼리
+2. Gemini로 정리: talent_description + core_values 리스트 생성
 
-#### 4. Gemini 직무 분석 (`gemini_extractor.py`)
-입력 데이터:
-- 회사명, 직무명
-- DART 섹션 (최대 6000자)
-- 뉴스 (최대 20개)
-- 기업 인재상 (talent_description, core_values)
-
-출력 JSON:
-```json
-{
-  "business_summary": "...",
-  "job_relevant_points": ["점1", "점2", ..., "점8"],
-  "recent_issues": ["이슈1", ..., "이슈5"],
-  "talent_alignment": ["적합도1", ..., "적합도5"],
-  "keywords": ["키워드1", ..., "키워드10"]
-}
-```
+#### 4. Gemini 직무 분석
+입력: 회사명, 직무명, DART 내용, 뉴스, 인재상  
+출력: 직무 관련 요점 8개, 최근 이슈 5개, 인재상 적합도 5개, 키워드 10개
 
 ---
 
