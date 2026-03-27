@@ -19,7 +19,8 @@ except ImportError:  # pragma: no cover
 
 _GEMINI_SYSTEM = "당신은 기업 채용 분석 전문가입니다. 반드시 JSON만 출력하세요."
 
-_GEMINI_USER = textwrap.dedent("""\
+_GEMINI_USER = textwrap.dedent(
+    """\
     아래는 '{company}' 기업의 인재상·채용 문화 관련 검색 결과입니다.
 
     {snippets}
@@ -31,7 +32,8 @@ _GEMINI_USER = textwrap.dedent("""\
       "talent_description": "인재상 종합 설명 (3-5문장)",
       "core_values": ["핵심가치1", "핵심가치2", "...최대 8개"]
     }}
-""")
+"""
+)
 
 
 class TalentCollector:

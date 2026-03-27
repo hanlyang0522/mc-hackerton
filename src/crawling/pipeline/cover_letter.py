@@ -91,6 +91,7 @@ class CoverLetterDataPipeline:
                     job_title=job_title,
                     dart_items=dart_items,
                     news_items=news_items,
+                    talent_profile=talent_profile,
                 )
             except Exception as exc:  # pylint: disable=broad-except
                 errors.append({"stage": "gemini", "error": str(exc)})

@@ -1,5 +1,4 @@
 """Gemini API를 이용해 수집 데이터에서 직무 관련 핵심 정보를 추출한다."""
-
 from __future__ import annotations
 
 import json
@@ -7,22 +6,23 @@ import textwrap
 
 from google import genai
 
-from ..core.models import DartBusinessContent, NewsItem
+from ..core.models import DartBusinessContent, NewsItem, TalentProfile
 
 
-_SYSTEM_PROMPT = textwrap.dedent(
-    """\
+_SYSTEM_PROMPT = textwrap.dedent("""\
     당신은 취업 자소서 작성 전문가입니다.
-    주어진 기업 데이터(DART 사업보고서, 뉴스 기사)를 바탕으로
+    주어진 기업 데이터(DART, 뉴스, 인재상)를 바탕으로
     지원 직무와 관련된 핵심 정보만 간결하게 정리해 주세요.
     반드시 JSON 형식으로만 응답하세요.
-"""
-)
+""")
 
-_USER_TEMPLATE = textwrap.dedent(
-    """\
+_USER_TEMPLATE = textwrap.dedent("""\
     ## 지원 기업: {company}
     ## 지원 직무: {job_title}
+
+    ---
+    ## 기업 인재상
+    {talent_section}
 
     ---
     ## DART 사업보고서 (최근 3개년)
@@ -44,12 +44,14 @@ _USER_TEMPLATE = textwrap.dedent(
       "recent_issues": [
         "최근 1-2년 내 주요 변화·이슈 (최대 5개)"
       ],
+      "talent_alignment": [
+        "기업 인재상과의 부합도 (최대 5개)"
+      ],
       "keywords_for_cover_letter": [
         "자소서에 활용할 키워드 (최대 10개)"
       ]
     }}
-"""
-)
+""")
 
 
 class GeminiExtractor:
@@ -67,14 +69,17 @@ class GeminiExtractor:
         job_title: str,
         dart_items: list[DartBusinessContent],
         news_items: list[NewsItem],
+        talent_profile: TalentProfile | None = None,
     ) -> dict:
         """직무 관련 핵심 정보를 추출해 dict로 반환한다."""
+        talent_section = self._format_talent(talent_profile)
         dart_section = self._format_dart(dart_items)
         news_section = self._format_news(news_items)
 
         prompt = _USER_TEMPLATE.format(
             company=company,
             job_title=job_title,
+            talent_section=talent_section,
             dart_section=dart_section,
             news_section=news_section,
         )
@@ -94,6 +99,16 @@ class GeminiExtractor:
         return json.loads(raw)
 
     # ------------------------------------------------------------------ helpers
+
+    @staticmethod
+    def _format_talent(profile: TalentProfile | None) -> str:
+        if not profile:
+            return "(인재상 정보 없음)"
+        lines = [
+            f"**인재상 요약**: {profile.talent_description}",
+            f"**핵심가치**: {', '.join(profile.core_values)}",
+        ]
+        return "\n".join(lines)
 
     @staticmethod
     def _format_dart(items: list[DartBusinessContent]) -> str:
