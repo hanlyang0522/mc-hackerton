@@ -15,6 +15,11 @@ class Settings:
     tavily_api_key: str
     gemini_api_key: str
     reviewer_api_url: str
+    copilot_reviewer_cli_command: str
+    foundry_project_endpoint: str
+    foundry_model_deployment_name: str
+    foundry_api_key: str
+    foundry_api_version: str
     news_api_endpoint: str
     news_api_client_id: str
     news_api_client_secret: str
@@ -34,6 +39,11 @@ def get_settings() -> Settings:
         tavily_api_key=os.getenv("TAVILY_API_KEY", "").strip(),
         gemini_api_key=os.getenv("GEMINI_API_KEY", "").strip(),
         reviewer_api_url=os.getenv("REVIEWER_API_URL", "").strip(),
+        copilot_reviewer_cli_command=os.getenv("COPILOT_REVIEWER_CLI_COMMAND", "").strip(),
+        foundry_project_endpoint=os.getenv("FOUNDRY_PROJECT_ENDPOINT", "").strip(),
+        foundry_model_deployment_name=os.getenv("FOUNDRY_MODEL_DEPLOYMENT_NAME", "").strip(),
+        foundry_api_key=os.getenv("FOUNDRY_API_KEY", "").strip(),
+        foundry_api_version=os.getenv("FOUNDRY_API_VERSION", "2024-06-01").strip(),
         news_api_endpoint=os.getenv(
             "NEWS_API_ENDPOINT", "https://openapi.naver.com/v1/search/news.json"
         ).strip(),

@@ -36,6 +36,9 @@ cp .env.example .env
 | `TAVILY_API_KEY` | Tavily 검색 API 키 (기업 정보/뉴스 검색) | ✅ |
 | `GEMINI_API_KEY` | Google Gemini API 키 (기업 분석 및 자소서 생성) | ✅ |
 | `REVIEWER_API_URL` | reviewer HTTP 서버 주소. 설정 시 생성된 자소서 초안 평가 실행 | ❌ |
+| `COPILOT_REVIEWER_CLI_COMMAND` | reviewer HTTP 실패 시 실행할 Copilot CLI 커맨드 | ❌ |
+| `FOUNDRY_PROJECT_ENDPOINT`, `FOUNDRY_MODEL_DEPLOYMENT_NAME`, `FOUNDRY_API_KEY` | reviewer HTTP/CLI 실패 시 Foundry 모델 폴백 호출 | ❌ |
+| `FOUNDRY_API_VERSION` | Foundry chat completions API 버전 (기본: `2024-06-01`) | ❌ |
 | `NEWS_API_CLIENT_ID`, `NEWS_API_CLIENT_SECRET` | Naver News API (Tavily 실패 시 폴백) | ❌ |
 | `MCP_NEWS_ENDPOINT` | MCP 뉴스 서버 (마지막 폴백) | ❌ |
 
@@ -61,6 +64,13 @@ python -m src.generate "SK하이닉스" "반도체 공정 엔지니어" "지원 
 ```
 
 `REVIEWER_API_URL`이 설정되어 있으면 reviewer는 생성된 초안을 평가합니다. 설정되어 있지 않으면 reviewer 단계는 자동으로 건너뜁니다.
+
+reviewer 호출 순서(폴백):
+1. `REVIEWER_API_URL` HTTP reviewer
+2. `COPILOT_REVIEWER_CLI_COMMAND` (stdin JSON 입력, stdout JSON 출력)
+3. Microsoft Foundry (`FOUNDRY_*` 설정)
+
+모든 경로가 실패하면 reviewer 단계는 실패 로그를 남기고 건너뜁니다.
 
 ## 출력
 

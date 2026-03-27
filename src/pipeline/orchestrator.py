@@ -259,7 +259,13 @@ class CoverLetterPipeline:
         max_length: int,
     ) -> dict[str, Any] | None:
         if not self.settings.reviewer_api_url:
-            return None
+            if not self.settings.copilot_reviewer_cli_command:
+                if not (
+                    self.settings.foundry_project_endpoint
+                    and self.settings.foundry_model_deployment_name
+                    and self.settings.foundry_api_key
+                ):
+                    return None
 
         try:
             return review_essay(
@@ -275,6 +281,11 @@ class CoverLetterPipeline:
                 },
                 banned_words=self.banned_words,
                 reviewer_api_url=self.settings.reviewer_api_url,
+                copilot_reviewer_cli_command=self.settings.copilot_reviewer_cli_command,
+                foundry_project_endpoint=self.settings.foundry_project_endpoint,
+                foundry_model_deployment_name=self.settings.foundry_model_deployment_name,
+                foundry_api_key=self.settings.foundry_api_key,
+                foundry_api_version=self.settings.foundry_api_version,
                 http_client=self.http_client,
             )
         except Exception as exc:  # pylint: disable=broad-except
