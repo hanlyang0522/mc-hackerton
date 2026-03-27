@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from ..collectors.dart import DartCollector
@@ -83,9 +84,9 @@ class CoverLetterDataPipeline:
         )
 
         gemini_insights: dict | None = None
-        if job_title and self.settings.gemini_api_key:
+        if job_title and os.environ.get("ANTHROPIC_API_KEY"):
             try:
-                extractor = GeminiExtractor(api_key=self.settings.gemini_api_key)
+                extractor = GeminiExtractor()
                 gemini_insights = extractor.extract(
                     company=company_name,
                     job_title=job_title,
