@@ -1,0 +1,87 @@
+{
+  "name": "김준우",
+  "education": [
+    {
+      "school": "가톨릭대학교",
+      "major": "미디어기술콘텐츠학과",
+      "degree": "졸업",
+      "period": "2021.03 ~ 2026.02",
+      "gpa_total": "3.92 / 4.5",
+      "gpa_major": "4.00 / 4.5",
+      "credits": 130
+    }
+  ],
+  "internship": [
+    {
+      "org": "건설공제조합",
+      "department": "정보화지원실",
+      "period": "2025.09 ~ 2025.12",
+      "description": "Java / MyBatis / Oracle DB 기반 전사 웹 서비스 개발, 공공기관 IT 기획·개발·운영 보조"
+    }
+  ],
+  "training": [
+    {
+      "name": "삼성청년SW·AI아카데미 (SSAFY) 임베디드 트랙 15기",
+      "org": "삼성전자 주관",
+      "period": "2026.01 ~",
+      "description": "C/C++, Python, Linux, ARM 기반 임베디드 시스템 교육, IoT·센서·이미지 프로세싱 실습"
+    },
+    {
+      "name": "AWS AI 전문인재 양성 교육과정",
+      "org": "AWS 주관",
+      "period": "2025.07 ~ 2025.08",
+      "description": "AWS 콘솔 기반 서버 아키텍처 설계, AI/ML 이론 및 실습 (RAG, 파인튜닝, LLM)"
+    }
+  ],
+  "projects": [
+    {
+      "name": "개인 홈서버 구축",
+      "period": "2025.11 ~",
+      "tech": ["Docker", "Ollama", "Nginx", "Cloudflare"],
+      "description": "Mac Mini 기반 Docker 환경, LLM 로컬 운영, Nginx + Cloudflare 터널 외부 접근 구성"
+    },
+    {
+      "name": "RAG 기반 법률 챗봇",
+      "period": "2025.10 ~",
+      "tech": ["LangChain", "RAG", "pgvector"],
+      "description": "법률 문서 수집·전처리, 벡터 DB 구축, 리랭킹 단계 포함 파이프라인 구현"
+    },
+    {
+      "name": "커뮤니티 앱 개발",
+      "period": "2025.10 ~ 2026.02",
+      "tech": ["Flutter", "Supabase", "REST API"],
+      "description": "멀티플랫폼(iOS/Android) 커뮤니티 앱, 백엔드 API 연동, Supabase DB 구축"
+    },
+    {
+      "name": "PetBuddy",
+      "period": "2025.07 ~ 2025.08",
+      "tech": ["AWS", "EC2", "Route53", "ALB", "IAM", "ACM", "S3", "Lambda", "API Gateway", "Rekognition"],
+      "description": "반려견 견주-펫시터 매칭 앱. 전체 AWS 아키텍처 설계·구현, Rekognition 기반 견종 분석 서비스"
+    },
+    {
+      "name": "IoT 스마트팜",
+      "period": "2025.03 ~ 2025.06",
+      "tech": ["Arduino"],
+      "description": "습도 감지 기반 자동 급수 스마트팜 구현"
+    },
+    {
+      "name": "Story-GPT",
+      "period": "2024.09 ~ 2024.12",
+      "tech": ["OpenAI API", "JavaScript", "HTML/CSS"],
+      "description": "사용자 선택에 따라 전개가 달라지는 생성형 AI 웹서비스. 프롬프트 구조 설계 및 UX 반복 개선"
+    }
+  ],
+  "research": [
+    {
+      "org": "가톨릭대학교 CG연구실",
+      "role": "학부연구생",
+      "period": "2024.11 ~ 2026.02",
+      "description": "군중 밀도 기반 능동형 펜스 제어 시뮬레이션 연구, 이태원 참사 군중 흐름 CG 재현, 한국컴퓨터그래픽스학회 논문 작성"
+    }
+  ],
+  "language": [
+    { "name": "TOEIC", "score": "835점", "date": "2026.02" },
+    { "name": "TOEIC Speaking", "score": "Advanced Medium", "date": "2025.09" },
+    { "name": "미국 유학", "detail": "펜실베이니아주 State College 현지 학교 재학 약 2년", "period": "2006 ~ 2007" }
+  ]
+}

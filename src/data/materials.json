@@ -1,0 +1,297 @@
+[
+  {
+    "id": "construction_intern",
+    "display": "공공기관 정보화지원실 현장실습",
+    "activity_key": "construction_intern",
+    "capabilities": ["금융IT 실무", "조직 적응력", "백엔드/DB"],
+    "question_types": ["지원동기형", "직무적합성형", "팀워크형"],
+    "keywords": ["실무", "Java", "DB", "공공기관", "금융", "운영", "조직", "인턴", "현장"],
+    "industries": ["금융IT", "공공기관", "SI"],
+    "priority": 1,
+    "activity_detail": {
+      "period": "2025.09 ~ 2025.12",
+      "org": "건설공제조합 정보화지원실",
+      "type": "4학년 2학기 현장실습",
+      "roles": [
+        "WebSquare5 기반 전사 웹 서비스 페이지 구현 참여 (Java / MyBatis / Oracle DB)",
+        "단순 기능 구현이 아닌 업무 프로세스 분석 후 DB 설계·개선",
+        "공공기관 IT 기획, 개발, 운영 업무 보조"
+      ],
+      "insights": [
+        "금융 IT 시스템의 본질(안정성과 신뢰) 체감",
+        "개발과 운영이 긴밀히 맞물린다는 사실을 실무에서 직접 경험"
+      ],
+      "social_experience": [
+        "처음으로 실제 조직에서 업무 지시·일정·결과물 사이클 경험",
+        "협업하며 소통 방식, 보고 체계, 직장 내 관계 형성 체득"
+      ],
+      "how_to_use": "조직 내에서 어떻게 일하는 사람인지를 보여주는 소재. '현장에서 실제로 일해본 경험이 있어 조직 적응이 빠릅니다'의 근거로 어디서든 활용 가능"
+    }
+  },
+  {
+    "id": "petbuddy_troubleshooting",
+    "display": "클라우드 기반 앱 서비스 팀 프로젝트 트러블슈팅",
+    "activity_key": "petbuddy",
+    "capabilities": ["클라우드/인프라", "문제해결력", "AI/ML"],
+    "question_types": ["문제해결형", "직무적합성형"],
+    "keywords": ["트러블슈팅", "AWS", "아키텍처", "보안", "단계적", "인증서", "인프라", "배포"],
+    "industries": ["IT", "AI", "클라우드", "금융IT"],
+    "priority": 1,
+    "activity_detail": {
+      "period": "2025.07 ~ 2025.08",
+      "org": "AWS 교육과정 팀 프로젝트",
+      "subject": "반려견 견주-펫시터 매칭 앱",
+      "my_role": "전체 AWS 아키텍처 설계 및 구현 (EC2, Route53, ALB, IAM, ACM, S3, Lambda, API Gateway), AWS Rekognition으로 반려견 품종 분석·성격 데이터 연계 서비스 구현",
+      "problem": "보안·고가용성 반영한 복잡한 아키텍처를 설계했으나 콘솔 구현 과정이 예상보다 훨씬 어려웠음. 인증서(ACM), IAM 권한 관리, 네트워크 보안 설정 등 여러 이슈로 서버 기동 자체부터 난항 → 3일간 밤낮 없이 시행착오",
+      "judgment": "처음부터 완성형 아키텍처를 한 번에 올리려다 막힌 것이 문제. 복잡도를 낮추고 검증된 것부터 쌓아야 한다고 판단",
+      "action": "최소 서비스(Route53-ALB-EC2)로 배포 환경 먼저 확보 후 점차 인증·보안 기능 확장",
+      "result": "처음 설계한 안정성·보안·고가용성 아키텍처 완성. 안정적 배포, 이미지 분석 AI와 데이터 처리 기능 실제 환경에서 작동",
+      "insights": [
+        "서비스 운영·인프라 관리가 시스템 전체 품질에 직결된다는 점 체감",
+        "문제 상황에서 우선순위 조정 및 단계적 해결책 도출이 핵심"
+      ]
+    }
+  },
+  {
+    "id": "petbuddy_team",
+    "display": "클라우드 기반 앱 서비스 팀 프로젝트 리더십",
+    "activity_key": "petbuddy",
+    "capabilities": ["팀워크·협업"],
+    "question_types": ["팀워크형", "가치관형"],
+    "keywords": ["팀", "협업", "PM", "역할", "설득", "갈등", "방향", "조율", "냉정"],
+    "industries": ["IT", "AI"],
+    "priority": 1,
+    "activity_detail": {
+      "period": "2025.07 ~ 2025.08",
+      "org": "AWS 교육과정 팀 프로젝트",
+      "situation": "PM 미숙으로 팀 방향이 흔들리는 상황",
+      "judgment": "PM 역할을 빼앗는 것이 아니라 잃지 않도록 보조하며 회의 논점을 구조화하는 방향 선택",
+      "action": [
+        "아이디어를 사업성·사용자 경험·기술적 현실성 세 측면에서 검토해 실행 가능한 방향 제시",
+        "각자의 강점이 드러나도록 역할 조율·업무 분담"
+      ],
+      "strength": "사업성과 기술 현실성을 냉정하게 검토해 실행 가능한 방향을 잡는 판단력",
+      "weakness": "직설적 지적이 팀원 의욕을 꺾을 수 있음 → 각자 강점에 맞는 역할 배분으로 보완",
+      "result": "팀 방향 재정비 후 프로젝트 완성"
+    }
+  },
+  {
+    "id": "storygpt",
+    "display": "생성형 AI 웹서비스 기획·개발",
+    "activity_key": "storygpt",
+    "capabilities": ["기획력/UX", "문제해결력", "AI/ML"],
+    "question_types": ["문제해결형", "직무적합성형", "가치관형"],
+    "keywords": ["프롬프트", "UX", "사용자", "실험", "반복", "기획", "AI", "콘텐츠", "인터랙티브"],
+    "industries": ["IT", "AI", "콘텐츠", "핀테크"],
+    "priority": 2,
+    "activity_detail": {
+      "period": "2024.09 ~ 2024.12",
+      "org": "교내 프로젝트 (미디어 S/W 및 콘텐츠 제작대회)",
+      "subject": "사용자 선택에 따라 전개가 달라지는 생성형 AI 웹서비스",
+      "roles": [
+        "GPT API를 단순 텍스트 생성이 아닌 인터랙티브 콘텐츠로 구현",
+        "프롬프트 엔지니어링 (문맥 길이, 토큰 제어, 역할 지시어 구성)"
+      ],
+      "problem": "생성된 이야기 맥락 어색·응답 일관성 부족 문제 → 단순 파라미터 조정이 아닌 프롬프트 구조 자체 문제임을 파악",
+      "action": [
+        "이전 장면 핵심 정보를 구조화해 프롬프트에 포함, 캐릭터·세계관 명확 정의",
+        "선택지 생성 모델과 본문 스토리 생성 모델 분리해 각각 최적화된 프롬프트 설계",
+        "데이터 흐름 재설계로 사용자의 이전 선택 정보 누락 방지",
+        "Reddit 커뮤니티 유사 사례 참고, Claude·GPT 병행 비교 분석"
+      ],
+      "ux": "글자 배열, 버튼 위치, 화면 구성 등 세부 요소 수정하며 사용자 테스트 반복. 처음 접하는 사용자도 별도 설명 없이 사용 가능하도록 여러 차례 프로토타입 개선",
+      "insights": [
+        "AI 서비스 기획·개발·운영 전 과정 경험",
+        "디자인·구성이 서비스 몰입도에 큰 영향을 준다는 점 인식",
+        "사용자 중심 UI/UX 설계 시각"
+      ]
+    }
+  },
+  {
+    "id": "rag_chatbot",
+    "display": "법률 도메인 특화 AI 챗봇 개발",
+    "activity_key": "rag_chatbot",
+    "capabilities": ["AI/ML", "문제해결력", "백엔드/DB"],
+    "question_types": ["직무적합성형", "문제해결형"],
+    "keywords": ["RAG", "데이터", "파이프라인", "전처리", "LangChain", "챗봇", "법률", "임베딩"],
+    "industries": ["IT", "AI", "금융IT", "법률"],
+    "priority": 2,
+    "activity_detail": {
+      "period": "2025.10 ~ ",
+      "org": "개인 프로젝트",
+      "tech": "LangChain, RAG, pgvector",
+      "roles": [
+        "법률 문서 데이터 수집·전처리 완료, 챗봇 구현 진행 중",
+        "법률 문서는 조항 구조가 복잡하고 참조 관계가 얽혀 있어 문단/조항/의미 단위 등 여러 분할 방식을 실험하며 최적 전략 탐색",
+        "벡터 DB 구축 및 유사도 검색 최적화, 리랭킹 단계 추가로 법률 용어 특수성 반영"
+      ],
+      "key_insight": "AI 최종 성능이 모델 자체보다 데이터 파이프라인 설계에 더 크게 좌우됨",
+      "capabilities": [
+        "RAG 전 파이프라인 직접 구현 (전처리 → 임베딩 → 검색 → 리랭킹 → 생성)",
+        "도메인 특화 데이터 처리 전략 수립"
+      ]
+    }
+  },
+  {
+    "id": "aws_education",
+    "display": "AWS 주관 AI 전문 교육과정",
+    "activity_key": "aws_education",
+    "capabilities": ["AI/ML", "클라우드/인프라"],
+    "question_types": ["지원동기형", "직무적합성형"],
+    "keywords": ["AWS", "AI", "클라우드", "교육", "실습", "아키텍처", "ML", "딥러닝"],
+    "industries": ["IT", "AI", "클라우드"],
+    "priority": 2,
+    "activity_detail": {
+      "period": "2025.07 ~ 2025.08",
+      "org": "AWS 주관",
+      "roles": [
+        "AWS 콘솔 기반 서버 아키텍처 설계 및 AI 서비스 실습",
+        "ML·딥러닝 기본 원리부터 RAG, 파인튜닝, LLM 활용까지 단계적 학습",
+        "데이터 전처리, 성능 평가, 편향 문제 등 실제 적용 시 고려 요소 학습",
+        "IAM, 네트워크, 보안 설정 직접 실습, 보안·고가용성 중심 아키텍팅 교육"
+      ],
+      "insights": [
+        "클라우드 인프라 이해 (IAM, 네트워크, 보안)",
+        "AI/ML 이론·실습 (RAG, 파인튜닝, LLM)",
+        "AI는 모델 개발이 아닌 운영·관리 차원에서 완성된다는 인식"
+      ]
+    }
+  },
+  {
+    "id": "homeserver",
+    "display": "개인 홈서버 구축 및 LLM 로컬 운영",
+    "activity_key": "homeserver",
+    "capabilities": ["클라우드/인프라", "AI/ML"],
+    "question_types": ["직무적합성형", "가치관형"],
+    "keywords": ["서버", "운영", "Docker", "LLM", "Nginx", "네트워크", "로컬", "인프라"],
+    "industries": ["IT", "AI", "클라우드"],
+    "priority": 3,
+    "activity_detail": {
+      "period": "2025.11 ~ ",
+      "org": "개인 프로젝트",
+      "setup": [
+        "Mac Mini 기반 Docker 컨테이너 환경 구축·운영",
+        "Ollama로 오픈소스 LLM 로컬 배포 및 Open WebUI 운영",
+        "Nginx + Cloudflare 터널로 외부 접근 환경 구성"
+      ],
+      "capabilities": [
+        "실제 서버 운영·유지관리",
+        "LLM 로컬 환경 구축·운영",
+        "네트워크 보안(터널링) 실무 적용"
+      ]
+    }
+  },
+  {
+    "id": "ssafy",
+    "display": "삼성전자 주관 소프트웨어 교육과정",
+    "activity_key": "ssafy",
+    "capabilities": ["임베디드/IoT"],
+    "question_types": ["지원동기형", "직무적합성형"],
+    "keywords": ["임베디드", "C", "Linux", "ARM", "IoT", "하드웨어", "삼성", "센서"],
+    "industries": ["반도체", "제조", "IT"],
+    "priority": 2,
+    "activity_detail": {
+      "period": "2026.01 ~ ",
+      "org": "삼성전자 주관 삼성청년SW·AI아카데미",
+      "roles": [
+        "C/C++, Python, Linux, ARM 기반 임베디드 시스템 교육 이수 중",
+        "IoT·센서, 이미지 프로세싱 등 하드웨어 연계 SW 개발 실습"
+      ],
+      "capabilities": [
+        "임베디드 시스템 및 저수준 프로그래밍",
+        "하드웨어-소프트웨어 연계 개발"
+      ]
+    }
+  },
+  {
+    "id": "iot_smartfarm",
+    "display": "센서 기반 자동 제어 시스템 구현",
+    "activity_key": "iot_smartfarm",
+    "capabilities": ["임베디드/IoT"],
+    "question_types": ["직무적합성형", "문제해결형"],
+    "keywords": ["Arduino", "센서", "IoT", "자동화", "임베디드", "하드웨어", "제어"],
+    "industries": ["반도체", "제조", "IT"],
+    "priority": 3,
+    "activity_detail": {
+      "period": "2025.03 ~ 2025.06",
+      "org": "교내 프로젝트",
+      "roles": [
+        "Arduino를 활용한 습도 감지 기반 자동 급수 스마트팜 구현"
+      ],
+      "capabilities": [
+        "하드웨어 센서 제어 및 자동화 시스템 구현",
+        "임베디드 기초"
+      ]
+    }
+  },
+  {
+    "id": "community_app",
+    "display": "멀티플랫폼 커뮤니티 앱 개발",
+    "activity_key": "community_app",
+    "capabilities": ["백엔드/DB"],
+    "question_types": ["직무적합성형"],
+    "keywords": ["Flutter", "앱", "Supabase", "REST", "API", "모바일", "백엔드", "DB"],
+    "industries": ["IT", "핀테크"],
+    "priority": 3,
+    "activity_detail": {
+      "period": "2025.10 ~ 2026.02",
+      "org": "개인 프로젝트",
+      "roles": [
+        "Flutter 기반 멀티플랫폼(iOS/Android) 커뮤니티 앱 개발",
+        "REST API 연동 백엔드 통신 구현",
+        "Supabase DB 구축"
+      ],
+      "capabilities": [
+        "멀티플랫폼 앱 개발",
+        "백엔드 API 연동 및 DB 설계"
+      ]
+    }
+  },
+  {
+    "id": "cg_research",
+    "display": "컴퓨터 그래픽스 연구실 학부연구생",
+    "activity_key": "cg_research",
+    "capabilities": ["연구·논문"],
+    "question_types": ["가치관형", "직무적합성형"],
+    "keywords": ["연구", "논문", "시뮬레이션", "문제의식", "학술", "CG", "군중"],
+    "industries": ["IT", "AI", "연구기관"],
+    "priority": 3,
+    "activity_detail": {
+      "period": "2024.11 ~ 2026.02",
+      "org": "가톨릭대학교 최명걸 교수님 CG연구실",
+      "roles": [
+        "군중 밀도 기반 능동형 펜스 제어 시뮬레이션 연구 참여",
+        "이태원 참사 군중 흐름을 CG 시뮬레이션으로 재구현해 밀집 상황 군중 통제 방안 탐구",
+        "연구 결과 한국컴퓨터그래픽스학회 논문 작성"
+      ],
+      "capabilities": [
+        "학술 연구 방법론·논문 작성",
+        "CG 시뮬레이션",
+        "사회 문제를 기술로 접근하는 관점"
+      ]
+    }
+  },
+  {
+    "id": "us_study",
+    "display": "미국 유학 생활 경험",
+    "activity_key": "us_study",
+    "capabilities": ["가치관·성장"],
+    "question_types": ["가치관형"],
+    "keywords": ["유학", "가치관", "성장", "다문화", "적응", "영어", "개방", "공학"],
+    "industries": ["전 산업"],
+    "priority": 3,
+    "activity_detail": {
+      "period": "2006 ~ 2007",
+      "location": "펜실베이니아주 State College",
+      "experience": [
+        "현지 학교 재학·생활, 다양한 배경의 친구들과 지내며 차이를 존중하는 태도·시야 형성",
+        "유학 중 MIT 견학 → 학생들이 직접 기계를 설계·실험하는 모습을 보며 공학에 대한 꿈을 품게 된 계기"
+      ],
+      "capabilities": [
+        "영어 커뮤니케이션",
+        "다문화 적응력·개방적 사고"
+      ],
+      "how_to_use": "가치관 형성의 원점 소재. 공학에 대한 꿈의 계기, 다양성 존중 태도의 근거로 활용"
+    }
+  }
+]
