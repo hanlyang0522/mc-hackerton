@@ -12,7 +12,9 @@ from ..core.utils import HttpClient, slugify
 class TalentCollector:
     KEYWORDS = ["인재상", "핵심가치", "인재", "가치", "채용", "문화"]
 
-    def __init__(self, http_client: HttpClient, homepage_url: str = "", talent_page_url: str = "") -> None:
+    def __init__(
+        self, http_client: HttpClient, homepage_url: str = "", talent_page_url: str = ""
+    ) -> None:
         self.http_client = http_client
         self.homepage_url = homepage_url
         self.talent_page_url = talent_page_url
@@ -21,7 +23,9 @@ class TalentCollector:
         candidates = self._candidate_urls(company_name)
         for url in candidates:
             try:
-                response = self.http_client.get(url, headers={"User-Agent": "Mozilla/5.0"})
+                response = self.http_client.get(
+                    url, headers={"User-Agent": "Mozilla/5.0"}
+                )
             except Exception:  # pylint: disable=broad-except
                 continue
 
@@ -32,7 +36,9 @@ class TalentCollector:
                 nested = self._find_talent_link(soup, url)
                 if nested:
                     try:
-                        nested_response = self.http_client.get(nested, headers={"User-Agent": "Mozilla/5.0"})
+                        nested_response = self.http_client.get(
+                            nested, headers={"User-Agent": "Mozilla/5.0"}
+                        )
                         nested_soup = BeautifulSoup(nested_response.text, "lxml")
                         body_text = nested_soup.get_text("\n")
                         url = nested
@@ -78,7 +84,11 @@ class TalentCollector:
 
     def _find_talent_link(self, soup: BeautifulSoup, base_url: str) -> str:
         for anchor in soup.find_all("a", href=True):
-            title = (anchor.get_text(" ", strip=True) or "") + " " + str(anchor.get("href", ""))
+            title = (
+                (anchor.get_text(" ", strip=True) or "")
+                + " "
+                + str(anchor.get("href", ""))
+            )
             if any(word in title for word in self.KEYWORDS):
                 return urljoin(base_url, str(anchor["href"]))
         return ""

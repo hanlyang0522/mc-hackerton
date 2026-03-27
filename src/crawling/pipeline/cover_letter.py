@@ -14,6 +14,7 @@ from ..core.config import get_settings
 from ..core.models import PipelineResult
 from ..core.storage import JsonStorage
 from ..core.utils import HttpClient
+from .gemini_extractor import GeminiExtractor
 
 
 class CoverLetterDataPipeline:
@@ -26,7 +27,7 @@ class CoverLetterDataPipeline:
         )
         self.storage = JsonStorage(db_root)
 
-    def run(self, company_name: str) -> Path:
+    def run(self, company_name: str, job_title: str = "") -> Path:
         errors: list[dict[str, str]] = []
 
         dart_items = []
@@ -79,7 +80,22 @@ class CoverLetterDataPipeline:
             errors=errors,
         )
 
+        gemini_insights: dict | None = None
+        if job_title and self.settings.gemini_api_key:
+            try:
+                extractor = GeminiExtractor(api_key=self.settings.gemini_api_key)
+                gemini_insights = extractor.extract(
+                    company=company_name,
+                    job_title=job_title,
+                    dart_items=dart_items,
+                    news_items=news_items,
+                )
+            except Exception as exc:  # pylint: disable=broad-except
+                errors.append({"stage": "gemini", "error": str(exc)})
+
         self.storage.save_dart(company_name, dart_items)
         self.storage.save_news(company_name, news_items)
         self.storage.save_talent(company_name, talent_profile)
+        if gemini_insights is not None:
+            self.storage.save_gemini(company_name, job_title, gemini_insights)
         return self.storage.save_summary(result)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import io
 import re
 import zipfile
@@ -88,16 +89,39 @@ class DartCollector:
             if not selected_receipt_no:
                 continue
 
+            filtered_content = self._filter_subsections(selected_business_content)
             results.append(
                 DartBusinessContent(
                     company=company_name,
                     year=year,
                     report_name=selected_report_name,
                     receipt_no=selected_receipt_no,
-                    business_content=selected_business_content,
+                    business_content=filtered_content,
                 )
             )
-        return sorted(results, key=lambda x: x.year, reverse=True)
+        sorted_results = sorted(results, key=lambda x: x.year, reverse=True)
+        return self._deduplicate_overview(sorted_results)
+
+    def _deduplicate_overview(self, results: list) -> list:
+        """사업의 개요는 최신 연도 1개만 유지하고, 이전 연도에서는 제거한다."""
+        overview_pattern = re.compile(r"사업의\s*개요")
+        overview_kept = False
+        deduped = []
+        for item in results:  # 최신 연도 순
+            if not overview_kept:
+                deduped.append(item)
+                overview_kept = True
+            else:
+                # 사업의 개요 섹션 제거: 해당 블록을 제외한 나머지만 유지
+                split = self._TOP_LEVEL_SPLIT_PATTERN.split(item.business_content)
+                without = [
+                    p
+                    for p in split
+                    if not overview_pattern.search(p.lstrip("\n").split("\n")[0])
+                ]
+                new_content = "\n\n".join(p.strip() for p in without if p.strip())
+                deduped.append(dataclasses.replace(item, business_content=new_content))
+        return deduped
 
     def _extract_fiscal_year_from_report_name(self, report_name: str) -> int | None:
         match = re.search(r"\((\d{4})\.\d{2}\)", report_name)
@@ -268,3 +292,24 @@ class DartCollector:
 
         best = max(candidate_sections, key=score)
         return best[:200000].strip()
+
+    # 추출할 소제목 키워드 (번호 무관하게 제목 텍스트로 매칭)
+    _TOP_LEVEL_SPLIT_PATTERN = re.compile(
+        r"(?=\n\d+\.\s+(?:사업의\s*개요|주요\s*제품\s*및\s*서비스|원재료\s*및\s*생산|매출\s*및\s*수주|위험관리|주요계약\s*및\s*연구개발|기타\s*참고))"
+    )
+    # 추출할 소제목 키워드 (번호 무관하게 제목 텍스트로 매칭)
+    _TARGET_SUBSECTION_KEYWORDS = re.compile(
+        r"사업의\s*개요|주요\s*제품\s*및\s*서비스|주요계약\s*및\s*연구개발"
+    )
+
+    def _filter_subsections(self, business_content: str) -> str:
+        """최상위 섹션 단위로 분할하고 _TARGET_SUBSECTION_KEYWORDS 에 해당하는 구간만 반환한다."""
+        parts = self._TOP_LEVEL_SPLIT_PATTERN.split(business_content)
+
+        selected: list[str] = []
+        for part in parts:
+            first_line = part.lstrip("\n").split("\n")[0]
+            if self._TARGET_SUBSECTION_KEYWORDS.search(first_line):
+                selected.append(part.strip())
+
+        return "\n\n".join(selected) if selected else business_content
