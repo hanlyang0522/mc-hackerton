@@ -4,6 +4,9 @@ import os
 from pathlib import Path
 
 import google.generativeai as genai
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 _DATA_DIR = Path(__file__).resolve().parent.parent / "data"
