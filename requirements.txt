@@ -1,0 +1,6 @@
+dart-fss>=0.4.8
+requests>=2.32.0
+beautifulsoup4>=4.12.3
+python-dotenv>=1.0.1
+lxml>=5.2.2
+tavily-python>=0.5.0

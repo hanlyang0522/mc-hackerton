@@ -1,0 +1,13 @@
+{
+  "company": "CJ올리브영",
+  "dart_items": [],
+  "news_items": [],
+  "talent_profile": null,
+  "errors": [
+    {
+      "stage": "dart",
+      "error": "기업명을 찾을 수 없습니다: CJ올리브영"
+    }
+  ],
+  "collected_at": "2026-03-27T14:24:53"
+}
